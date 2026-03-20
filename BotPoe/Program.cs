@@ -1,7 +1,5 @@
-﻿using Discord;
-using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using BotPoe.Services;
 
 namespace BotPoe;
 
@@ -9,46 +7,32 @@ class Program
 {
     public static async Task Main(string[] args)
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .Build();
-
+        // 1. On prépare le moteur avec nos deux services
         using var services = new ServiceCollection()
-            .AddSingleton<IConfiguration>(config)
-            .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
-            {
-                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
-                LogLevel = LogSeverity.Info
-            }))
+            .AddSingleton<HttpClient>()
+            .AddSingleton<ILeagueService, GggLeagueService>()      // Brique 1
+            .AddSingleton<IPoePriceService, PoeNinjaPriceService>() // Brique 2
             .BuildServiceProvider();
 
-        var client = services.GetRequiredService<DiscordSocketClient>();
+        Console.WriteLine("[TEST] Vérification de la chaîne complète...");
 
-        client.Log += (msg) =>
+        // 2. On récupère le service de prix
+        var priceService = services.GetRequiredService<IPoePriceService>();
+
+        // 3. On demande le prix d'une Divine
+        Console.WriteLine("Interrogation de poe.ninja pour la Divine Orb...");
+        var price = await priceService.GetPriceAsync("Divine Orb");
+
+        // 4. Résultat final
+        Console.WriteLine("-----------------------------------------");
+        if (price.HasValue)
         {
-            Console.WriteLine(msg.ToString());
-            return Task.CompletedTask;
-        };
-
-        string? token = config["BotToken"];
-
-        if (string.IsNullOrEmpty(token))
-        {
-            Console.WriteLine("ERREUR : Le Token est vide ou introuvable dans appsettings.json !");
-            return;
+            Console.WriteLine($"✅ SUCCÈS : 1 Divine Orb vaut {price.Value} Chaos !");
         }
-
-        await client.LoginAsync(TokenType.Bot, token);
-        await client.StartAsync();
-
-        client.MessageReceived += async (msg) =>
+        else
         {
-            if (msg.Author.IsBot) return;
-            if (msg.Content.ToLower() == "!test")
-                await msg.Channel.SendMessageAsync("✅ Bot connecté avec succès via appsettings.json !");
-        };
-
-        await Task.Delay(-1);
+            Console.WriteLine("❌ ÉCHEC : Impossible de trouver le prix.");
+        }
+        Console.WriteLine("-----------------------------------------");
     }
 }
