@@ -9,6 +9,7 @@ using BotPoe.Services;
 using BotPoe.Services.belt;
 using BotPoe.Services.Currency;
 using BotPoe.Services.Beast;
+using BotPoe.Services.Essence;
 using BotPoe.Services.Message;
 
 namespace BotPoe;
@@ -40,6 +41,7 @@ class Program
                 services.AddSingleton<IPoePriceCurrencyService, PoePriceCurrencyService>();
                 services.AddSingleton<IPoePriceBeltService, PoePriceBeltService>();
                 services.AddSingleton<IPoePriceBeastService, PoePriceBeastService>();
+                services.AddSingleton<IPoePriceEssenceService, PoePriceEssenceService>();
                 services.AddHostedService<PriceMonitorService>();
             })
             .Build();

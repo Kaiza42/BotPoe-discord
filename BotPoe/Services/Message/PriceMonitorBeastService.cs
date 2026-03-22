@@ -28,7 +28,7 @@ public class PriceMonitorBeastService : ModuleBase<SocketCommandContext>
         if (allBeasts != null && allBeasts.Any())
         {
             var embed = new EmbedBuilder()
-                .WithTitle("📜 Bestiaire de la Ménagerie (Prix Actuels)")
+                .WithTitle("📜 Bestiaire de la Ménagerie")
                 .WithColor(Color.DarkGreen)
                 .WithThumbnailUrl("https://web.poecdn.com/image/beast-hunter/beast-tab-icon.png")
                 .WithFooter(footer => footer.Text = $"Basé sur la ligue actuelle • Divine : {divPrice ?? 0}c")
