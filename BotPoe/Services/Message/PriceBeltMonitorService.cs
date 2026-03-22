@@ -1,8 +1,8 @@
 using Discord.Commands;
 using Discord.WebSocket;
-using BotPoe.Services;
+using BotPoe.Services.belt;
 
-namespace BotPoe.Modules;
+namespace BotPoe.Services.Currency.Message;
 
 // The goal of this page is to ask the user for a belt name and return the price of the requested belt.
 public class PriceBeltMonitorService : ModuleBase<SocketCommandContext>

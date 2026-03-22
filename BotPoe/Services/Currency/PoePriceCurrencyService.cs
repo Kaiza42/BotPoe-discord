@@ -1,6 +1,7 @@
 using System.Text.Json;
+using BotPoe.Services.Currency;
 
-namespace BotPoe.Services;
+namespace BotPoe.Services.Currency;
 
 // This page is used to look up the price of, for example, the Divine in Chaos on PoeNinja.
 // The price is the chaos equivalent, not the price listed on PoE Ninja.

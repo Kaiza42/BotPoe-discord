@@ -1,6 +1,7 @@
 using System.Text.Json;
+using BotPoe.Services.belt;
 
-namespace BotPoe.Services;
+namespace BotPoe.Services.belt;
 
 public class PoePriceBeltService : IPoePriceBeltService
 {

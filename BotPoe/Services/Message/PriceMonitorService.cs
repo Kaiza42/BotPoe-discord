@@ -1,9 +1,10 @@
+using BotPoe.Services.Currency;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace BotPoe.Services;
+namespace BotPoe.Services.Message;
 
 public class PriceMonitorService : BackgroundService
 {
@@ -54,11 +55,10 @@ public class PriceMonitorService : BackgroundService
                     _lastDailyPostDate = now;
                 }
             }
-            await SendAlertAsync("Le bot POE est lancé !");
+            await SendAlertAsync("Le bot POE Price est ON");
             await SendAlertAsync($"Le prix d'achat de la divine est : **{currentPrice} Chaos**");
             await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
         }
-
     }
 
     private async Task SendAlertAsync(string message)

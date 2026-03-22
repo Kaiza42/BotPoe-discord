@@ -1,4 +1,4 @@
-namespace BotPoe.Services;
+namespace BotPoe.Services.Currency;
 
 public interface IPoePriceCurrencyService
 {

@@ -6,7 +6,10 @@ using Discord.WebSocket;
 using Discord;
 using Discord.Commands;
 using BotPoe.Services;
-using BotPoe.Modules;
+using BotPoe.Services.belt;
+using BotPoe.Services.Currency;
+using BotPoe.Services.Beast;
+using BotPoe.Services.Message;
 
 namespace BotPoe;
 
@@ -22,6 +25,7 @@ class Program
         using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
+
                 services.AddSingleton<IConfiguration>(config);
                 services.AddSingleton<HttpClient>();
                 services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -35,6 +39,7 @@ class Program
                 services.AddSingleton<ILeagueService, GggLeagueService>();
                 services.AddSingleton<IPoePriceCurrencyService, PoePriceCurrencyService>();
                 services.AddSingleton<IPoePriceBeltService, PoePriceBeltService>();
+                services.AddSingleton<IPoePriceBeastService, PoePriceBeastService>();
                 services.AddHostedService<PriceMonitorService>();
             })
             .Build();
@@ -55,7 +60,6 @@ class Program
                 if (message.HasStringPrefix("!", ref argPos))
                 {
                     var context = new SocketCommandContext(client, message);
-
                     var result = await commands.ExecuteAsync(context, argPos, services);
 
                     if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
@@ -80,7 +84,7 @@ class Program
         await client.LoginAsync(TokenType.Bot, token);
         await client.StartAsync();
 
-        Console.WriteLine("[SYSTEM] Bot prêt ! Utilise !belt sur Discord.");
+        Console.WriteLine("[SYSTEM] Bot prêt ! Commandes : !belt, !beast");
 
         await host.RunAsync();
     }

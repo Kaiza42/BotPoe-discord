@@ -1,4 +1,4 @@
-namespace BotPoe.Services;
+namespace BotPoe.Services.belt;
 
 public interface IPoePriceBeltService
 {
