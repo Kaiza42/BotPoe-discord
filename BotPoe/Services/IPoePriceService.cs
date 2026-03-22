@@ -1,6 +1,6 @@
 namespace BotPoe.Services;
 
-public interface IPoePriceService
+public interface IPoePriceCurrencyService
 {
     Task<double?> GetPriceAsync(string currencyName);
 }

@@ -15,6 +15,7 @@
         <None Update="appsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     </ItemGroup>
 
 </Project>

@@ -1,5 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Discord.WebSocket;
+using Discord;
+using Discord.Commands;
 using BotPoe.Services;
+using BotPoe.Modules;
 
 namespace BotPoe;
 
@@ -7,32 +14,74 @@ class Program
 {
     public static async Task Main(string[] args)
     {
-        // 1. On prépare le moteur avec nos deux services
-        using var services = new ServiceCollection()
-            .AddSingleton<HttpClient>()
-            .AddSingleton<ILeagueService, GggLeagueService>()      // Brique 1
-            .AddSingleton<IPoePriceService, PoeNinjaPriceService>() // Brique 2
-            .BuildServiceProvider();
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
 
-        Console.WriteLine("[TEST] Vérification de la chaîne complète...");
+        using IHost host = Host.CreateDefaultBuilder(args)
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSingleton<IConfiguration>(config);
+                services.AddSingleton<HttpClient>();
+                services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
+                {
+                    GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
+                    AlwaysDownloadUsers = true,
+                    LogLevel = LogSeverity.Info
+                }));
 
-        // 2. On récupère le service de prix
-        var priceService = services.GetRequiredService<IPoePriceService>();
+                services.AddSingleton<CommandService>();
+                services.AddSingleton<ILeagueService, GggLeagueService>();
+                services.AddSingleton<IPoePriceCurrencyService, PoePriceCurrencyService>();
+                services.AddSingleton<IPoePriceBeltService, PoePriceBeltService>();
+                services.AddHostedService<PriceMonitorService>();
+            })
+            .Build();
 
-        // 3. On demande le prix d'une Divine
-        Console.WriteLine("Interrogation de poe.ninja pour la Divine Orb...");
-        var price = await priceService.GetPriceAsync("Divine Orb");
+        var client = host.Services.GetRequiredService<DiscordSocketClient>();
+        var commands = host.Services.GetRequiredService<CommandService>();
+        var services = host.Services;
 
-        // 4. Résultat final
-        Console.WriteLine("-----------------------------------------");
-        if (price.HasValue)
+        client.Log += (msg) => { Console.WriteLine(msg.ToString()); return Task.CompletedTask; };
+
+        client.MessageReceived += (msg) =>
         {
-            Console.WriteLine($"✅ SUCCÈS : 1 Divine Orb vaut {price.Value} Chaos !");
-        }
-        else
+            _ = Task.Run(async () =>
+            {
+                if (msg is not SocketUserMessage message || message.Author.IsBot) return;
+
+                int argPos = 0;
+                if (message.HasStringPrefix("!", ref argPos))
+                {
+                    var context = new SocketCommandContext(client, message);
+
+                    var result = await commands.ExecuteAsync(context, argPos, services);
+
+                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
+                    {
+                        Console.WriteLine($"[ERREUR COMMANDE] {result.ErrorReason}");
+                    }
+                }
+            });
+
+            return Task.CompletedTask;
+        };
+
+        await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+
+        string? token = config["BotToken"];
+        if (string.IsNullOrEmpty(token))
         {
-            Console.WriteLine("❌ ÉCHEC : Impossible de trouver le prix.");
+            Console.WriteLine("[ERREUR] Le token du bot est introuvable dans appsettings.json.");
+            return;
         }
-        Console.WriteLine("-----------------------------------------");
+
+        await client.LoginAsync(TokenType.Bot, token);
+        await client.StartAsync();
+
+        Console.WriteLine("[SYSTEM] Bot prêt ! Utilise !belt sur Discord.");
+
+        await host.RunAsync();
     }
 }
