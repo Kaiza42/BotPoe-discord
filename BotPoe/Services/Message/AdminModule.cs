@@ -2,7 +2,7 @@ using BotPoe.Models;
 using Discord.Commands;
 
 namespace BotPoe.Services.Message;
-
+// The purpose of this page is simply to turn off the bot so it stops sending alerts
 public class AdminModule : ModuleBase<SocketCommandContext>
 {
     private readonly BotStateService _botState;
