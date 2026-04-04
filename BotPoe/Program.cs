@@ -11,6 +11,7 @@ using BotPoe.Services.Currency;
 using BotPoe.Services.Beast;
 using BotPoe.Services.Essence;
 using BotPoe.Services.Message;
+using BotPoe.Models;
 
 namespace BotPoe;
 
@@ -26,7 +27,6 @@ class Program
         using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-
                 services.AddSingleton<IConfiguration>(config);
                 services.AddSingleton<HttpClient>();
                 services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
@@ -35,7 +35,7 @@ class Program
                     AlwaysDownloadUsers = true,
                     LogLevel = LogSeverity.Info
                 }));
-
+                services.AddSingleton<BotStateService>();
                 services.AddSingleton<CommandService>();
                 services.AddSingleton<ILeagueService, GggLeagueService>();
                 services.AddSingleton<IPoePriceCurrencyService, PoePriceCurrencyService>();
@@ -43,6 +43,7 @@ class Program
                 services.AddSingleton<IPoePriceBeastService, PoePriceBeastService>();
                 services.AddSingleton<IPoePriceEssenceService, PoePriceEssenceService>();
                 services.AddHostedService<PriceMonitorService>();
+                services.AddSingleton<AdminModule>();
             })
             .Build();
 
