@@ -1,6 +1,6 @@
 using System.Text.Json;
 using BotPoe.Models;
-using BotPoe.Services.belt;
+using BotPoe.Services.League;
 
 namespace BotPoe.Services.belt;
 

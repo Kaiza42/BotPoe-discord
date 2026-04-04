@@ -5,13 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Discord.WebSocket;
 using Discord;
 using Discord.Commands;
-using BotPoe.Services;
 using BotPoe.Services.belt;
 using BotPoe.Services.Currency;
 using BotPoe.Services.Beast;
 using BotPoe.Services.Essence;
 using BotPoe.Services.Message;
 using BotPoe.Models;
+using BotPoe.Services.League;
 
 namespace BotPoe;
 

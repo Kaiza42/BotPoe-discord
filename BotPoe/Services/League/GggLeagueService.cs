@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace BotPoe.Services;
+namespace BotPoe.Services.League;
 
 // This page is only used to look up the name of the current POE league via the GGG API.
 public class GggLeagueService : ILeagueService

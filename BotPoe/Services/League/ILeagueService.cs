@@ -1,4 +1,4 @@
-namespace BotPoe.Services;
+namespace BotPoe.Services.League;
 
 public interface ILeagueService
 {
