@@ -33,8 +33,7 @@ public class PriceRingMonitorService : ModuleBase<SocketCommandContext>
             if (priceChaos > 0)
             {
                 string messageFinal = $"✅ Le prix pour **{ringName}** est de : `{priceChaos}c`";
-
-                // Conversion en Divine si le prix est élevé (ex: > 500c)
+                
                 if (priceChaos >= 500)
                 {
                     double? divinePrice = await _currencyService.GetPriceAsync("Divine Orb");
