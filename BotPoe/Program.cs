@@ -13,6 +13,7 @@ using BotPoe.Services.Message;
 using BotPoe.Models;
 using BotPoe.Services.League;
 using BotPoe.Services.Ring;
+using BotPoe.Services.Regex;
 
 namespace BotPoe;
 
@@ -46,6 +47,8 @@ class Program
                 services.AddHostedService<PriceMonitorService>();
                 services.AddSingleton<AdminModule>();
                 services.AddSingleton<IPoePriceRingService, PoePriceRingService>();
+                services.AddSingleton<RegexModule>();
+                services.AddSingleton<RegexService>();
             })
             .Build();
 
