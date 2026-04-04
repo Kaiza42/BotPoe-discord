@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15
+    container_name: poe_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  bot:
+    build:
+      context: .
+      dockerfile: BotPoe/Dockerfile
+    container_name: poe_bot
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+
+volumes:
+  pgdata:

@@ -14,6 +14,8 @@ using BotPoe.Models;
 using BotPoe.Services.League;
 using BotPoe.Services.Ring;
 using BotPoe.Services.Regex;
+using BotPoe.Data;
+using DotNetEnv;
 
 namespace BotPoe;
 
@@ -21,6 +23,13 @@ class Program
 {
     public static async Task Main(string[] args)
     {
+        Env.Load();
+        
+        using (var db = new AppDbContext())
+        {
+            await db.Database.EnsureCreatedAsync();
+        }
+
         var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -35,7 +44,7 @@ class Program
                 {
                     GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
                     AlwaysDownloadUsers = true,
-                    LogLevel = LogSeverity.Info
+                    LogLevel = LogSeverity.Error 
                 }));
                 services.AddSingleton<BotStateService>();
                 services.AddSingleton<CommandService>();
@@ -54,9 +63,7 @@ class Program
 
         var client = host.Services.GetRequiredService<DiscordSocketClient>();
         var commands = host.Services.GetRequiredService<CommandService>();
-        var services = host.Services;
-
-        client.Log += (msg) => { Console.WriteLine(msg.ToString()); return Task.CompletedTask; };
+        var servicesProvider = host.Services;
 
         client.MessageReceived += (msg) =>
         {
@@ -68,31 +75,21 @@ class Program
                 if (message.HasStringPrefix("!", ref argPos))
                 {
                     var context = new SocketCommandContext(client, message);
-                    var result = await commands.ExecuteAsync(context, argPos, services);
-
-                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand)
-                    {
-                        Console.WriteLine($"[ERREUR COMMANDE] {result.ErrorReason}");
-                    }
+                    await commands.ExecuteAsync(context, argPos, servicesProvider);
                 }
             });
 
             return Task.CompletedTask;
         };
 
-        await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-
-        string? token = config["BotToken"];
-        if (string.IsNullOrEmpty(token))
-        {
-            Console.WriteLine("[ERREUR] Le token du bot est introuvable dans appsettings.json.");
-            return;
-        }
+        await commands.AddModulesAsync(Assembly.GetEntryAssembly(), servicesProvider);
+        
+        string? token = Environment.GetEnvironmentVariable("DISCORD_TOKEN") ?? config["BotToken"];
+        
+        if (string.IsNullOrEmpty(token)) return;
 
         await client.LoginAsync(TokenType.Bot, token);
         await client.StartAsync();
-
-        Console.WriteLine("[SYSTEM] Bot prêt ! Commandes : !belt, !beast");
 
         await host.RunAsync();
     }

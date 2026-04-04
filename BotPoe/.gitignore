@@ -7,23 +7,14 @@ obj/
 *.user
 *.suo
 *.sln.docstates
-
-### --- JetBrains Rider / IntelliJ --- ###
 .idea/
 *.sln.iml
-# On garde les fichiers de run s'ils sont partagés, mais souvent on les ignore :
 .idea/workspace.xml
 .idea/shelf/
 .idea/contentModel.xml
-
-### --- Visual Studio Code --- ###
 .vscode/
-
-### --- OS spécifiques (Linux/Mac) --- ###
 .DS_Store
 Thumbs.db
 .directory
-
-### --- Configuration Sensible (Ton Token !) --- ###
 appsettings.json
 *.env
